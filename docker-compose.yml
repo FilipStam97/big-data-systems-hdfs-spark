@@ -12,9 +12,10 @@ services:
       - ./hadoop_namenode:/opt/hadoop/data/nameNode
       - ./hadoop_config:/opt/hadoop/etc/hadoop
       - ./start-hdfs.sh:/start-hdfs.sh
+      - ./:/opt/hadoop/project   
     ports:
       - "9870:9870"
-      - "9000:9000"
+      # - "9000:9000"
     command: [ "/bin/bash", "/start-hdfs.sh" ]
     networks:
       hdfs_network:
