@@ -57,6 +57,41 @@ services:
         hdfs_network:
           ipv4_address: 172.20.0.4
 
+  spark-master:
+    image: apache/spark:latest
+    container_name: spark-master
+    hostname: spark-master
+    environment:
+      SPARK_MODE: master
+      PATH: /opt/spark/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    entrypoint: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master"]
+    command: ["--host", "spark-master"]
+    ports:
+      - "8080:8080"     # Web UI
+      - "7077:7077"     # RPC
+    networks:
+      hdfs_network:
+        ipv4_address: 172.20.0.10
+    volumes:
+      - ./hadoop_config:/opt/spark/conf      # So Spark sees core-site.xml and hdfs-site.xml
+      - ./:/opt/workspace                    #  spark_app.py 
+
+  spark-worker:
+    image: apache/spark:latest
+    container_name: spark-worker
+    hostname: spark-worker
+    environment:
+      SPARK_MODE: worker
+      PATH: /opt/spark/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    entrypoint: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker"]
+    command: ["spark://spark-master:7077"]
+    networks:
+      hdfs_network:
+        ipv4_address: 172.20.0.11
+    volumes:
+      - ./hadoop_config:/opt/spark/conf
+      - ./:/opt/workspace
+
 networks:
   hdfs_network:
     ipam:
